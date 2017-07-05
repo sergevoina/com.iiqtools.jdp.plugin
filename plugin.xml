@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            id="com.iiqtools.jdp.IIQTOOLS_CLASSPATH_CONTAINER"
+            class="com.iiqtools.jdp.IIQToolsClasspathContainerInitializer"/>
+   </extension>
+   
+   <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            id="com.iiqtools.jdp.IIQTOOLS_CLASSPATH_CONTAINER"
+            name="IIQ Tools Annotations"
+            class="com.iiqtools.jdp.IIQToolsClasspathContainerPage"/>
+   </extension>
+   
+   <extension point="org.eclipse.ui.commands">
+      <category 
+            name="IIQ Tools"
+            id="com.iiqtools.jdp.commands.category">
+      </category>
+      <command
+            name="IIQ Artefact"
+            categoryId="com.iiqtools.jdp.commands.category"
+            id="com.iiqtools.jdp.commands.artefactCommand">
+      </command>
+   </extension>
+   
+   <extension point="org.eclipse.ui.handlers">
+      <handler
+            commandId="com.iiqtools.jdp.commands.artefactCommand"
+            class="com.iiqtools.jdp.handlers.IIQArtefactHandler">
+      </handler>
+   </extension>
+   
+   <extension point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.iiqtools.jdp.commands.artefactCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            sequence="M1+6"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </key>
+   </extension>
+   
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               label="IIQ Tools"
+               mnemonic="M"
+               id="com.iiqtools.jdp.menus.artefactMenu">
+            <command
+                  commandId="com.iiqtools.jdp.commands.artefactCommand"
+                  mnemonic="S"
+                  id="com.iiqtools.jdp.menus.artefactCommand">
+            </command>
+         </menu>
+      </menuContribution>
+      
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.iiqtools.jdp.toolbars.sampleToolbar">
+            <command
+                  commandId="com.iiqtools.jdp.commands.artefactCommand"
+                  icon="icons/sample.gif"
+                  tooltip="IIQ Artefact"
+                  id="com.iiqtools.jdp.toolbars.artefactCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+</plugin>

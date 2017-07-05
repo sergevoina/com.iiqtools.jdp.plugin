@@ -1,0 +1,21 @@
+package com.iiqtools.jdp.util;
+
+public class TextUtil {
+	public static String shiftLeft(String source) {
+		// DOS uses carriage return and line feed ("\r\n") as a line ending,
+		// which Unix uses just line feed ("\n").
+		
+		// myString.replaceAll("[ \t]+(\r\n?|\n)", "$1");
+		
+		String regex = "(\n|\r\n)\t";
+		
+		if (source != null && source.length() > 0) {
+			source = source.replaceAll(regex, "$1");
+
+			if ((source.length() > 0) && (source.charAt(0) == '\t')) {
+				source = source.substring(1);
+			}
+		}
+		return source;
+	}
+}

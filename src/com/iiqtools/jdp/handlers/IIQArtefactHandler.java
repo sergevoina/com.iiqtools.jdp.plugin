@@ -104,18 +104,18 @@ public class IIQArtefactHandler extends AbstractHandler {
 			throw new Exception("Cannot find top level type");
 		}
 
-		IAnnotation annotation = topLevelType.getAnnotation("IIQArtefact");
+		IAnnotation annotation = topLevelType.getAnnotation("Artefact");
 		if (annotation == null || !annotation.exists()) {
-			throw new Exception("Cannot find IIQArtefact annotation");
+			throw new Exception("Cannot find @Artefact annotation");
 		}
 
-		String name = null;
+		String target = null;
 		String xpath = null;
 		EOL eol = null;
 		for (IMemberValuePair pair : annotation.getMemberValuePairs()) {
 			String memberName = pair.getMemberName();
-			if ("name".equals(memberName)) {
-				name = (String) pair.getValue();
+			if ("target".equals(memberName)) {
+				target = (String) pair.getValue();
 			} else if ("xpath".equals(memberName)) {
 				xpath = (String) pair.getValue();
 			} else if ("eol".equals(memberName)) {
@@ -134,9 +134,9 @@ public class IIQArtefactHandler extends AbstractHandler {
 			throw new Exception("Cannot find JavaProject location");
 		}
 
-		File artefactFile = new File(projectDir, name);
+		File artefactFile = new File(projectDir, target);
 		if (!artefactFile.exists() || !artefactFile.isFile()) {
-			throw new Exception("Cannot find IIQ Artefact: " + name);
+			throw new Exception("Cannot find IIQ Artefact: " + target);
 		}
 
 		String script = getIIQScript(compilationUnit, topLevelType);
@@ -146,7 +146,7 @@ public class IIQArtefactHandler extends AbstractHandler {
 		MessageConsole console = JdtUtil.findConsole("IIQ Tools");
 		if (console != null) {
 			MessageConsoleStream out = console.newMessageStream();
-			out.println("Successfully updated IIQ Artefact: " + name);
+			out.println("Successfully updated IIQ Artefact: " + target);
 			out.flush();
 			out.close();
 		}
@@ -183,10 +183,10 @@ public class IIQArtefactHandler extends AbstractHandler {
 
 		IMethod[] methods = topLevelType.getMethods();
 		for (IMethod method : methods) {
-			if (JdtUtil.hasAnnotation(method, "IIQArtefactBody")) {
+			if (JdtUtil.hasAnnotation(method, "ArtefactBody")) {
 				bodyMethod = method;
 			} else {
-				if (!JdtUtil.hasAnnotation(method, "IIQArtefactIgnore")) {
+				if (!JdtUtil.hasAnnotation(method, "ArtefactIgnore")) {
 					ISourceRange sourceRange = method.getSourceRange();
 					int offset = sourceRange.getOffset() - 1;
 					int length = sourceRange.getLength() + 1;
@@ -249,26 +249,37 @@ public class IIQArtefactHandler extends AbstractHandler {
 
 	private void appendFields(StringBuilder sb, ICompilationUnit compilationUnit, IType topLevelType)
 			throws JavaModelException {
+
+		boolean appendEol = false;
 		IField[] fields = topLevelType.getFields();
 		for (IField field : fields) {
-			IAnnotation annotation = field.getAnnotation("IIQArtefactIgnore");
+			IAnnotation annotation = field.getAnnotation("ArtefactIgnore");
 			if (!annotation.exists()) {
 				String script = TextUtil.shiftLeft(field.getSource());
 				sb.append(script).append(this.lineSeparator);
+				appendEol = true;
 			}
 		}
-		sb.append(this.lineSeparator);
+
+		if (appendEol) {
+			sb.append(this.lineSeparator);
+		}
 	}
 
 	private void appendImportDeclarations(StringBuilder sb, ICompilationUnit compilationUnit, IType topLevelType)
 			throws JavaModelException {
+		boolean appendEol = false;
+
 		IImportDeclaration[] imports = compilationUnit.getImports();
 		for (IImportDeclaration importDeclaration : imports) {
 			String elementName = importDeclaration.getElementName();
 			if (elementName != null && !elementName.startsWith("com.iiqtools.jdp.annotation.")) {
 				sb.append("import ").append(importDeclaration.getElementName()).append(";").append(this.lineSeparator);
+				appendEol = true;
 			}
 		}
-		sb.append(this.lineSeparator);
+		if (appendEol) {
+			sb.append(this.lineSeparator);
+		}
 	}
 }

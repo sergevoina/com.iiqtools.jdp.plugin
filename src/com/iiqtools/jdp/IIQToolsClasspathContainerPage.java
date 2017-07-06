@@ -1,12 +1,25 @@
 package com.iiqtools.jdp;
 
+import java.io.File;
+
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * A very simple configuration page to make the IIQ Tools Classpath Container
@@ -17,161 +30,124 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class IIQToolsClasspathContainerPage extends WizardPage implements IClasspathContainerPage {
 
+	private String selectedDir = null;
+	private Text txtPath;
+	private Button btnBrowse;
+
 	/**
 	 * Default constructor for instantiation in Eclipse.
 	 */
 	public IIQToolsClasspathContainerPage() {
-		super("IIQ Tools Annotations", "IIQ Tools library", null);
-		setDescription("Add the IIQ Tools annotations library.");
+		super(Messages.PageName, Messages.PageTitle, null);
+		setDescription(Messages.PageDesc);
+		setPageComplete(true);
 	}
 
-	@Override
-	public void createControl(Composite aParent) {
-		Composite tempComposite = new Composite(aParent, SWT.NULL);
-		setControl(tempComposite);
-	}
+	// @Override
+	// public IClasspathEntry getSelection() {
+	// return JavaCore.newContainerEntry(new
+	// Path(IIQToolsClasspathContainerInitializer.PATH));
+	// }
 
 	@Override
 	public boolean finish() {
+		String dir = getSelectedDir();
+		if (dir != null && dir.length() > 0) {
+			if (!new File(dir).isDirectory()) {
+				String msg = NLS.bind(Messages.DirErr, dir);
+				setErrorMessage(msg);
+				return false;
+			}
+		}
 		return true;
 	}
 
 	@Override
 	public IClasspathEntry getSelection() {
-		return JavaCore.newContainerEntry(new Path(IIQToolsClasspathContainerInitializer.PATH));
+
+		IPath containerPath = new Path(IIQToolsClasspathContainerInitializer.PLUGIN_CONTAINER_ID);
+
+		String dirPath = getSelectedDir();
+		if ((dirPath != null) && (dirPath.length() > 0)) {
+
+			String os = Platform.getOS();
+			if (Platform.OS_WIN32.equals(os)) {
+				if ((dirPath.length() > 1) && dirPath.charAt(1) == ':') {
+					StringBuilder sb = new StringBuilder();
+					sb.append(dirPath.charAt(0)).append("/");
+
+					if (dirPath.length() > 2) {
+						sb.append(dirPath.substring(2));
+					}
+					dirPath = sb.toString();
+				}
+			}
+
+			containerPath = containerPath.append(dirPath);
+		}
+
+		return JavaCore.newContainerEntry(containerPath);
 	}
 
 	@Override
-	public void setSelection(IClasspathEntry aClasspathEntry) {
+	public void setSelection(IClasspathEntry containerEntry) {
+		if (containerEntry != null) {
+			this.selectedDir = IIQToolsClasspathContainer.getSelectedDirectory(containerEntry.getPath());
+		}
 	}
 
-	// @Override
-	// public boolean canFlipToNextPage() {
-	// return false;
-	// }
-	//
-	// @Override
-	// public String getName() {
-	// return "IIQ Tools Annotations";
-	// }
-	//
-	// @Override
-	// public IWizardPage getNextPage() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public IWizardPage getPreviousPage() {
-	// return prevPage;
-	// }
-	//
-	// @Override
-	// public IWizard getWizard() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public boolean isPageComplete() {
-	// return true;
-	// }
-	//
-	// IWizardPage prevPage;
-	// IWizard wizard;
-	//
-	// @Override
-	// public void setPreviousPage(IWizardPage prevPage) {
-	// this.prevPage = prevPage;
-	// }
-	//
-	// @Override
-	// public void setWizard(IWizard arg0) {
-	// this.wizard = wizard;
-	//
-	// }
-	//
-	// @Override
-	// public void createControl(Composite aParent) {
-	// Composite tempComposite = new Composite(aParent, SWT.NULL);
-	//
-	// setControl(tempComposite);
-	// }
-	//
-	// @Override
-	// public void dispose() {
-	//
-	// }
-	//
-	// @Override
-	// public Control getControl() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public String getDescription() {
-	// return "IIQ Tools library";
-	// }
-	//
-	// @Override
-	// public String getErrorMessage() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public Image getImage() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public String getMessage() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public String getTitle() {
-	// return "IIQ Tools";
-	// }
-	//
-	// @Override
-	// public void performHelp() {
-	//
-	// }
-	//
-	// @Override
-	// public void setDescription(String arg0) {
-	//
-	// }
-	//
-	// @Override
-	// public void setImageDescriptor(ImageDescriptor arg0) {
-	//
-	// }
-	//
-	// @Override
-	// public void setTitle(String arg0) {
-	//
-	// }
-	//
-	// @Override
-	// public void setVisible(boolean arg0) {
-	//
-	// }
-	//
-	// @Override
-	// public boolean finish() {
-	// return true;
-	// }
-	//
-	// IClasspathEntry selection;
-	//
-	// @Override
-	// public IClasspathEntry getSelection() {
-	// return selection;
-	// }
-	//
-	// @Override
-	// public void setSelection(IClasspathEntry selection) {
-	// this.selection = selection;
-	//
-	// }
+	@Override
+	public void createControl(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NULL);
+		// composite.setLayout(new GridLayout());
+		// composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL |
+		// GridData.HORIZONTAL_ALIGN_FILL));
+		composite.setFont(parent.getFont());
+
+		composite.setLayout(new GridLayout(2, false));
+
+		Label pathLabel = new Label(composite, SWT.NONE);
+		pathLabel.setText(Messages.DirLabel);
+
+		this.txtPath = new Text(composite, SWT.BORDER);
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = SWT.FILL;
+		gridData.grabExcessHorizontalSpace = true;
+		this.txtPath.setLayoutData(gridData);
+		this.txtPath.setText(this.selectedDir != null ? this.selectedDir : "");
+
+		btnBrowse = new Button(composite, SWT.NONE);
+		btnBrowse.setText(Messages.Browse);
+		gridData = new GridData();
+		gridData.verticalAlignment = SWT.TOP;
+		btnBrowse.setLayoutData(gridData);
+		btnBrowse.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				onBrowse();
+			}
+		});
+
+		super.setControl(composite);
+	}
+
+	/**
+	 * Creates a directory dialog
+	 */
+	protected void onBrowse() {
+		DirectoryDialog dialog = new DirectoryDialog(getContainer().getShell(), SWT.SAVE);
+		dialog.setMessage(Messages.DirSelect);
+		dialog.setFilterPath(this.txtPath.getText());
+		String dir = dialog.open();
+		if (dir != null) {
+			txtPath.setText(dir);
+		}
+	}
+
+	/**
+	 * @return the current extension list
+	 */
+	protected String getSelectedDir() {
+		return txtPath.getText().trim().toLowerCase();
+	}
 
 }

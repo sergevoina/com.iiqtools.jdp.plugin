@@ -12,15 +12,16 @@ import org.eclipse.jdt.core.JavaCore;
 public class IIQToolsClasspathContainerInitializer extends ClasspathContainerInitializer {
 
 	/**
-	 * The path name of the Integrity Classpath Container.
+	 * The path name of the IIQ Tools Classpath Container.
 	 */
-	public static final String PATH = "com.iiqtools.jdp.IIQTOOLS_CLASSPATH_CONTAINER";
+	public static final String PLUGIN_CONTAINER_ID = "com.iiqtools.jdp.IIQTOOLS_CLASSPATH_CONTAINER";
 
 	@Override
 	public void initialize(IPath containerPath, IJavaProject javaProject) throws CoreException {
-		IClasspathContainer container = new IIQToolsClasspathContainer(containerPath, javaProject);
-		JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { javaProject },
-				new IClasspathContainer[] { container }, null);
+		if (isValidContainerPath(containerPath)) {
+			JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { javaProject },
+					new IClasspathContainer[] { new IIQToolsClasspathContainer(containerPath, javaProject) }, null);
+		}
 	}
 
 	@Override
@@ -38,4 +39,9 @@ public class IIQToolsClasspathContainerInitializer extends ClasspathContainerIni
 					new IClasspathContainer[] { tempContainer }, null);
 		}
 	}
+
+	private static boolean isValidContainerPath(IPath path) {
+		return (path != null) && (path.segmentCount() > 0) && PLUGIN_CONTAINER_ID.equals(path.segment(0));
+	}
+
 }

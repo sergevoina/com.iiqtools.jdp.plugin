@@ -29,4 +29,8 @@ public class Messages extends NLS {
 	public static String directoryPageError;
 	public static String directoryDialogMessage;
 	
+	public static String messageDialogTitle;
+
+	public static String hasUnsavedChangesError;
+	public static String hasJavaProblemsError;
 }

@@ -2,10 +2,12 @@ package com.iiqtools.jdp.handlers;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -14,6 +16,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -34,6 +37,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.iiqtools.jdp.Messages;
 import com.iiqtools.jdp.annotation.EOL;
 import com.iiqtools.jdp.util.ArtefactUtil;
 import com.iiqtools.jdp.util.JdtUtil;
@@ -73,7 +77,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 				}
 			}
 		} catch (Exception e) {
-			MessageDialog.openInformation(window.getShell(), "IIQ Tools JDP", e.getMessage());
+			MessageDialog.openInformation(window.getShell(), Messages.messageDialogTitle, e.getMessage());
 		}
 		return null;
 	}
@@ -93,6 +97,45 @@ public class JdpArtefactHandler extends AbstractHandler {
 	}
 
 	private void handleCompilationUnit(ExecutionEvent event, ICompilationUnit compilationUnit) throws Exception {
+
+		if (compilationUnit instanceof IOpenable) {
+			IOpenable openable = (IOpenable) compilationUnit;
+			if (openable.hasUnsavedChanges()) {
+				throw new Exception(Messages.hasUnsavedChangesError);
+			}
+		}
+
+		IMarker[] markers = JdtUtil.findJavaProblemMarkers(compilationUnit);
+		if (markers.length > 0) {
+			boolean hasErrors = false;
+			// boolean hasWarining = false;
+			StringBuilder sb = new StringBuilder();
+			sb.append("Please fix all errors first:");
+
+			for (IMarker marker : markers) {
+				Map<String, Object> map = marker.getAttributes();
+
+				int severity = (int) map.get("severity");
+
+				if (severity == IMarker.SEVERITY_ERROR) {
+					hasErrors = true;
+					sb.append(System.lineSeparator()).append(map.get("message"));
+				}
+				// if (severity == IMarker.SEVERITY_WARNING) {
+				// hasWarining = true;
+				// }
+			}
+
+			if (hasErrors) {
+				throw new Exception(Messages.hasJavaProblemsError);
+			}
+
+			// if (hasWarining) {
+			// MessageDialog.openInformation(window.getShell(), "Custom
+			// Container",
+			// "The compilation unit has warnings!");
+			// }
+		}
 
 		// TODO: check the java file is saved
 
@@ -242,7 +285,6 @@ public class JdpArtefactHandler extends AbstractHandler {
 					}
 					return false;
 				};
-
 			});
 		}
 	}

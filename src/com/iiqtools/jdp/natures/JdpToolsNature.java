@@ -4,7 +4,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 
-public class IIQToolsNature implements IProjectNature {
+public class JdpToolsNature implements IProjectNature {
 
 	public static final String NATURE_ID = "com.iiqtools.jdp";
 

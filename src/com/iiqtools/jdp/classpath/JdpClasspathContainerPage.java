@@ -1,4 +1,4 @@
-package com.iiqtools.jdp;
+package com.iiqtools.jdp.classpath;
 
 import java.io.File;
 
@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +20,9 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.iiqtools.jdp.Constants;
+import com.iiqtools.jdp.Messages;
+
 /**
  * A very simple configuration page to make the IIQ Tools Classpath Container
  * show up in the libraries to add by the user. The page is actually empty,
@@ -28,7 +30,7 @@ import org.eclipse.swt.widgets.Text;
  * 
  * 
  */
-public class IIQToolsClasspathContainerPage extends WizardPage implements IClasspathContainerPage {
+public class JdpClasspathContainerPage extends WizardPage implements IClasspathContainerPage {
 
 	private String selectedDir = null;
 	private Text txtPath;
@@ -37,9 +39,9 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 	/**
 	 * Default constructor for instantiation in Eclipse.
 	 */
-	public IIQToolsClasspathContainerPage() {
-		super(Messages.PageName, Messages.PageTitle, null);
-		setDescription(Messages.PageDesc);
+	public JdpClasspathContainerPage() {
+		super(Messages.directoryPageName, Messages.directoryPageTitle, null);
+		setDescription(Messages.directoryPageDesc);
 		setPageComplete(true);
 	}
 
@@ -54,8 +56,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 		String dir = getSelectedDir();
 		if (dir != null && dir.length() > 0) {
 			if (!new File(dir).isDirectory()) {
-				String msg = NLS.bind(Messages.DirErr, dir);
-				setErrorMessage(msg);
+				setErrorMessage(Messages.bind(Messages.directoryPageError, dir));
 				return false;
 			}
 		}
@@ -65,7 +66,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 	@Override
 	public IClasspathEntry getSelection() {
 
-		IPath containerPath = new Path(IIQToolsClasspathContainerInitializer.PLUGIN_CONTAINER_ID);
+		IPath containerPath = new Path(Constants.PLUGIN_CONTAINER_ID);
 
 		String dirPath = getSelectedDir();
 		if ((dirPath != null) && (dirPath.length() > 0)) {
@@ -92,7 +93,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 	@Override
 	public void setSelection(IClasspathEntry containerEntry) {
 		if (containerEntry != null) {
-			this.selectedDir = IIQToolsClasspathContainer.getSelectedDirectory(containerEntry.getPath());
+			this.selectedDir = JdpClasspathContainer.getSelectedDirectory(containerEntry.getPath());
 		}
 	}
 
@@ -107,7 +108,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 		composite.setLayout(new GridLayout(2, false));
 
 		Label pathLabel = new Label(composite, SWT.NONE);
-		pathLabel.setText(Messages.DirLabel);
+		pathLabel.setText(Messages.directoryPageLabel);
 
 		this.txtPath = new Text(composite, SWT.BORDER);
 		GridData gridData = new GridData();
@@ -117,7 +118,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 		this.txtPath.setText(this.selectedDir != null ? this.selectedDir : "");
 
 		btnBrowse = new Button(composite, SWT.NONE);
-		btnBrowse.setText(Messages.Browse);
+		btnBrowse.setText(Messages.directoryPageBrowse);
 		gridData = new GridData();
 		gridData.verticalAlignment = SWT.TOP;
 		btnBrowse.setLayoutData(gridData);
@@ -135,7 +136,7 @@ public class IIQToolsClasspathContainerPage extends WizardPage implements IClass
 	 */
 	protected void onBrowse() {
 		DirectoryDialog dialog = new DirectoryDialog(getContainer().getShell(), SWT.SAVE);
-		dialog.setMessage(Messages.DirSelect);
+		dialog.setMessage(Messages.directoryDialogMessage);
 		dialog.setFilterPath(this.txtPath.getText());
 		String dir = dialog.open();
 		if (dir != null) {

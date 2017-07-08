@@ -33,7 +33,7 @@ import org.xml.sax.SAXException;
 
 import com.iiqtools.jdp.annotation.EOL;
 
-public class XmlUtil {
+public class ArtefactUtil {
 	public static Map<String, Object> updateArtefact(File file, String xpath, String script, EOL eol) throws Exception {
 		Map<String, Object> result = new HashMap<>();
 		// try {

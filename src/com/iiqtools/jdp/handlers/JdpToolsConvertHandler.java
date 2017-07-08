@@ -17,9 +17,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.iiqtools.jdp.natures.IIQToolsNature;
+import com.iiqtools.jdp.natures.JdpToolsNature;
 
-public class IIQToolsConvertHandler extends AbstractHandler {
+public class JdpToolsConvertHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -43,7 +43,7 @@ public class IIQToolsConvertHandler extends AbstractHandler {
 					System.arraycopy(natures, 0, newNatures, 0, natures.length);
 
 					// add our new "com.example.project.examplenature" id
-					newNatures[natures.length] = IIQToolsNature.NATURE_ID;
+					newNatures[natures.length] = JdpToolsNature.NATURE_ID;
 
 					// validate the natures
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();

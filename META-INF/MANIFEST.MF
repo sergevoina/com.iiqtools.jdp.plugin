@@ -12,8 +12,3 @@ Require-Bundle:
   org.eclipse.jst.ws.annotations.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Copyright: serge.voina@gmail.com
-Export-Package: com.iiqtools.jdp,
- com.iiqtools.jdp.annotation,
- com.iiqtools.jdp.handlers,
- com.iiqtools.jdp.natures,
- com.iiqtools.jdp.util

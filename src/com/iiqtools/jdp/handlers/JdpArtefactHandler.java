@@ -35,9 +35,9 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.iiqtools.jdp.annotation.EOL;
+import com.iiqtools.jdp.util.ArtefactUtil;
 import com.iiqtools.jdp.util.JdtUtil;
-import com.iiqtools.jdp.util.TextUtil;
-import com.iiqtools.jdp.util.XmlUtil;
+import com.iiqtools.jdp.util.PluginUtil;
 
 /**
  * http://www.vogella.com/tutorials/EclipseJDT/article.html
@@ -47,11 +47,11 @@ import com.iiqtools.jdp.util.XmlUtil;
  * @see org.eclipse.core.commands.IHandler
  * @see org.eclipse.core.commands.AbstractHandler
  */
-public class IIQArtefactHandler extends AbstractHandler {
+public class JdpArtefactHandler extends AbstractHandler {
 
 	final String lineSeparator;
 
-	public IIQArtefactHandler() {
+	public JdpArtefactHandler() {
 		this.lineSeparator = "\n";
 	}
 
@@ -141,7 +141,7 @@ public class IIQArtefactHandler extends AbstractHandler {
 
 		String script = getIIQScript(compilationUnit, topLevelType);
 
-		XmlUtil.updateArtefact(artefactFile, xpath, script, eol);
+		ArtefactUtil.updateArtefact(artefactFile, xpath, script, eol);
 
 		MessageConsole console = JdtUtil.findConsole("IIQ Tools");
 		if (console != null) {
@@ -203,7 +203,7 @@ public class IIQArtefactHandler extends AbstractHandler {
 						length++;
 					}
 
-					String script = TextUtil.shiftLeft(cuSource.substring(offset, offset + length));
+					String script = PluginUtil.shiftLeft(cuSource.substring(offset, offset + length));
 					// cuSource
 
 					// String script = method.getSource();
@@ -230,7 +230,7 @@ public class IIQArtefactHandler extends AbstractHandler {
 							String script = compilationUnit.getSource();
 							script = script.substring(s + 1, s + l - 2);
 
-							script = TextUtil.shiftLeft(TextUtil.shiftLeft(script));
+							script = PluginUtil.shiftLeft(PluginUtil.shiftLeft(script));
 							sb.append(script);
 						} catch (JavaModelException e) {
 							// TODO Auto-generated catch block
@@ -255,7 +255,7 @@ public class IIQArtefactHandler extends AbstractHandler {
 		for (IField field : fields) {
 			IAnnotation annotation = field.getAnnotation("ArtefactIgnore");
 			if (!annotation.exists()) {
-				String script = TextUtil.shiftLeft(field.getSource());
+				String script = PluginUtil.shiftLeft(field.getSource());
 				sb.append(script).append(this.lineSeparator);
 				appendEol = true;
 			}

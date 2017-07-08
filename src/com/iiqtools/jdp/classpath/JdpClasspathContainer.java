@@ -1,4 +1,4 @@
-package com.iiqtools.jdp;
+package com.iiqtools.jdp.classpath;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -19,14 +19,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
 
-public class IIQToolsClasspathContainer implements IClasspathContainer {
+import com.iiqtools.jdp.Constants;
+import com.iiqtools.jdp.Messages;
+import com.iiqtools.jdp.util.PluginUtil;
 
-	// plugin id
-	public static final String PLUGIN_ID = "com.iiqtools.jdp";
-	// Custom library relative path. The specified path is always relative to
-	// the
-	// root of the bundle and may begin with "/".
-	public static final String PLUGIN_LIBRARY_PATH = "com.iiqtools.jdp.annotation.jar";
+public class JdpClasspathContainer implements IClasspathContainer {
 
 	IPath containerPath;
 	String description;
@@ -47,9 +44,9 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 	 * @param javaProject
 	 *            the Java project that is referencing this container
 	 */
-	public IIQToolsClasspathContainer(IPath containerPath, IJavaProject javaProject) {
+	public JdpClasspathContainer(IPath containerPath, IJavaProject javaProject) {
 		this.containerPath = containerPath;
-		this.description = "IIQ Tools Annotations";
+		this.description = Messages.classpathContainerDescription;
 	}
 
 	@Override
@@ -59,7 +56,7 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 		listOfFiles.add(getAnnotationLibraryPath());
 
 		String dirPath = getSelectedDirectory(containerPath);
-		if (dirPath != null) {
+		if (PluginUtil.isNotNullOrEmpty(dirPath)) {
 			File[] files = new File(dirPath).listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File file, String name) {
@@ -107,7 +104,7 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 		// folder or null if this location should be automatically detected.
 		IPath srcRoot = null;
 
-		if (path != null && path.endsWith(".jar")) {
+		if (PluginUtil.isNotNullOrEmpty(path) && path.endsWith(".jar")) {
 			String srcFile = path.substring(0, path.length() - 4) + "-src.zip";
 
 			if (new File(srcFile).exists()) {
@@ -116,8 +113,7 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 			}
 		}
 
-		IPath libPath = new Path(path);
-		return JavaCore.newLibraryEntry(libPath, srcPath, srcRoot, false);
+		return JavaCore.newLibraryEntry(new Path(path), srcPath, srcRoot, false);
 	}
 
 	private String getAnnotationLibraryPath() {
@@ -131,7 +127,7 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 		// Path(absolutePath), null, new Path("/"));
 
 		/* get bundle with the specified id */
-		Bundle bundle = Platform.getBundle(PLUGIN_ID);
+		Bundle bundle = Platform.getBundle(Constants.PLUGIN_ID);
 		if (bundle != null) {
 			// Returns a URL to the entry at the specified path in this bundle.
 			// This
@@ -151,7 +147,7 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 			// contain directory entries.
 			//
 			// bundleentry://1004.fwk664232848/test.custom.annotation.jar
-			URL libURL = bundle.getEntry(PLUGIN_LIBRARY_PATH);
+			URL libURL = bundle.getEntry(Constants.PLUGIN_LIBRARY_PATH);
 			if (libURL != null) {
 				try {
 					// file:/C:/Users/...
@@ -202,5 +198,4 @@ public class IIQToolsClasspathContainer implements IClasspathContainer {
 		}
 		return dirPath;
 	}
-
 }

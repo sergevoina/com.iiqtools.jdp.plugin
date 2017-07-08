@@ -3,6 +3,13 @@ package com.iiqtools.jdp.util;
 import java.util.Collections;
 import java.util.Iterator;
 
+/**
+ * <p>
+ * This class provides static methods and fields only
+ * </p>
+ * 
+ * @author Serge Voina
+ */
 public class PluginUtil {
 	public static boolean isNullOrEmpty(String str) {
 		return (str == null) || (str.length() == 0);

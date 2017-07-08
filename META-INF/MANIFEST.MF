@@ -2,13 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IdentityIQ Java Development Plugin
 Bundle-SymbolicName: com.iiqtools.jdp;singleton:=true
-Bundle-Version: 0.0.9.beta
+Bundle-Version: 0.0.10.devbuild
 Bundle-Vendor: IIQ Tools
 Require-Bundle: 
-  org.eclipse.core.resources, org.eclipse.core.runtime,
-  org.eclipse.ui, org.eclipse.ui.console,
-  org.eclipse.jdt, org.eclipse.jdt.core, org.eclipse.jdt.ui, 
-  org.eclipse.jface, org.eclipse.jface.text,
-  org.eclipse.jst.ws.annotations.core
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.jface,
+ org.eclipse.jface.text,
+ org.eclipse.ui,
+ org.eclipse.ui.console,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.workbench,
+ org.eclipse.ui.workbench.texteditor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Copyright: serge.voina@gmail.com

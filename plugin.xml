@@ -13,6 +13,14 @@
             name="IIQ Tools Library"
             class="com.iiqtools.jdp.classpath.JdpClasspathContainerPage"/>
    </extension>
+
+   <extension point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+      <hyperlinkDetector id="com.iiqtools.jdp.hyperlinkDetector.ArtefactDetector"
+            name="Preferences" targetId="org.eclipse.jdt.ui.javaCode"
+            class="com.iiqtools.jdp.hyperlinkDetector.ArtefactDetector"
+            description="Blah blah" activate="true" modifierKeys="">
+      </hyperlinkDetector>
+   </extension>
    
    <extension point="org.eclipse.ui.commands">
       <category 

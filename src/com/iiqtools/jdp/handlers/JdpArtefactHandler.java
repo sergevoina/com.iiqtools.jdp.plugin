@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -186,7 +187,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 
 		ArtefactUtil.updateArtefact(artefactFile, xpath, script, eol);
 
-		MessageConsole console = JdtUtil.findConsole("IIQ Tools");
+		MessageConsole console = JdtUtil.getConsole("IIQ Tools");
 		if (console != null) {
 			MessageConsoleStream out = console.newMessageStream();
 			out.println("Successfully updated IIQ Artefact: " + target);
@@ -257,7 +258,8 @@ public class JdpArtefactHandler extends AbstractHandler {
 
 		if (bodyMethod != null) {
 			final String methodName = bodyMethod.getElementName();
-			CompilationUnit cu = JdtUtil.parse(compilationUnit);
+			CompilationUnit cu = SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, null);
+
 			cu.accept(new ASTVisitor() {
 				@Override
 				public boolean visit(MethodDeclaration node) {

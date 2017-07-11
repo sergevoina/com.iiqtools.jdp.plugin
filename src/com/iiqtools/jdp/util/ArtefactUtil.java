@@ -78,6 +78,9 @@ public class ArtefactUtil {
 	 * @throws TransformerException
 	 */
 	public static void saveDocument(Document xmlDoc, File file, EOL eol) throws Exception {
+		// remove standalone="no" from XML declaration
+		xmlDoc.setXmlStandalone(true);
+		
 		DOMSource source = new DOMSource(xmlDoc);
 
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();

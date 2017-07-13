@@ -51,4 +51,14 @@ public class PluginUtil {
 		return source;
 	}
 
+	public static boolean areEqual(String s1, String s2) {
+		if (s1 != null) {
+			return s1.equals(s2);
+		}
+		return (s2 == null);
+	}
+
+	public static boolean areNotEqual(String s1, String s2) {
+		return !areEqual(s1, s2);
+	}
 }

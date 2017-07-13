@@ -1,12 +1,12 @@
 package com.iiqtools.jdp.handlers;
 
-import java.io.File;
 import java.util.Date;
 import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -172,20 +172,22 @@ public class JdpArtefactHandler extends AbstractHandler {
 		}
 
 		IJavaProject javaProject = topLevelType.getJavaProject();
+		
+		IFile targetFile = javaProject.getProject().getFile(target);
 
-		File projectDir = javaProject.getResource().getLocation().toFile();
-		if (projectDir == null) {
-			throw new Exception("Cannot find JavaProject location");
-		}
-
-		File artefactFile = new File(projectDir, target);
-		if (!artefactFile.exists() || !artefactFile.isFile()) {
-			throw new Exception("Cannot find IIQ Artefact: " + target);
-		}
+//		File projectDir = javaProject.getResource().getLocation().toFile();
+//		if (projectDir == null) {
+//			throw new Exception("Cannot find JavaProject location");
+//		}
+//
+//		File artefactFile = new File(projectDir, target);
+//		if (!artefactFile.exists() || !artefactFile.isFile()) {
+//			throw new Exception("Cannot find IIQ Artefact: " + target);
+//		}
 
 		String script = getIIQScript(compilationUnit, topLevelType);
 
-		ArtefactUtil.updateArtefact(artefactFile, xpath, script, eol);
+		ArtefactUtil.updateArtefact(targetFile, xpath, script, eol);
 
 		MessageConsole console = JdtUtil.getConsole("IIQ Tools");
 		if (console != null) {

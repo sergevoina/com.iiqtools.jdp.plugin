@@ -1,6 +1,6 @@
 package com.iiqtools.jdp.hyperlinkDetector;
 
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -128,9 +128,11 @@ public class ArtefactDetector extends AbstractHyperlinkDetector implements IHype
 				return null;
 
 			// create path
-			IPath artefactPath = element.getJavaProject().getPath().append(target);
+			// IPath artefactPath =
+			// element.getJavaProject().getPath().append(target);
 
-			return new IHyperlink[] { new ArtefactHyperlink(wordRegion, artefactPath, xpath) };
+			IFile targetFile = element.getJavaProject().getProject().getFile(target);
+			return new IHyperlink[] { new ArtefactHyperlink(wordRegion, targetFile, xpath) };
 		} catch (JavaModelException ex) {
 		}
 

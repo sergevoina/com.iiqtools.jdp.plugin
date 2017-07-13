@@ -1,5 +1,10 @@
 package com.iiqtools.jdp.annotation;
 
+/**
+ * 
+ * @author Serge Voina
+ *
+ */
 public enum EOL {
 	Target {
 		@Override

@@ -56,7 +56,7 @@ public class ArtefactUtil {
 		}
 	}
 
-	public static Map<String, Object> updateArtefact(IFile file, String xpath, String script, EOL eol)
+	public static Map<String, Object> updateArtefact(IFile file, String script, ArtefactInfo artefactInfo)
 			throws Exception {
 		Map<String, Object> result = new HashMap<>();
 		// try {
@@ -68,10 +68,10 @@ public class ArtefactUtil {
 			throw new Exception(sb.toString());
 		}
 
-		Node node = getDocumentNode(document, xpath);
+		Node node = getDocumentNode(document, artefactInfo.xpath);
 		if (node == null) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Cannot find unique match for xpath: ").append(System.lineSeparator()).append(xpath)
+			sb.append("Cannot find unique match for xpath: ").append(System.lineSeparator()).append(artefactInfo.xpath)
 					.append(System.lineSeparator());
 			throw new Exception(sb.toString());
 		}
@@ -79,7 +79,7 @@ public class ArtefactUtil {
 		node.setTextContent("");
 		node.appendChild(document.createCDATASection(script));
 
-		saveDocument(document, file, eol);
+		saveDocument(document, file, artefactInfo.eol);
 
 		result.put("status", "OK");
 		// } catch (Exception e) {

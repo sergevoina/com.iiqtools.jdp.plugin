@@ -2,10 +2,8 @@ package com.iiqtools.jdp.hyperlinkDetector;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IAnnotatable;
-import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -18,6 +16,8 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import com.iiqtools.jdp.util.ArtefactInfo;
+import com.iiqtools.jdp.util.JdtUtil;
 import com.iiqtools.jdp.util.PluginUtil;
 
 /**
@@ -101,25 +101,13 @@ public class ArtefactDetector extends AbstractHyperlinkDetector implements IHype
 			if (!(element instanceof IAnnotatable))
 				return null;
 
-			IAnnotation annotation = ((IAnnotatable) element).getAnnotation(ARTEFACT_ID);
-			if (annotation == null || !annotation.exists())
+			// Get target property value
+			ArtefactInfo artefactInfo = JdtUtil.getArtefactInfo((IAnnotatable) element);
+
+			if (artefactInfo == null)
 				return null;
 
-			// Get target property value
-			String target = null;
-			String xpath = null;
-			IMemberValuePair[] pairs = annotation.getMemberValuePairs();
-			if (pairs != null) {
-				for (IMemberValuePair pair : pairs) {
-					if ("target".equals(pair.getMemberName())) {
-						target = (String) pair.getValue();
-					} else if ("xpath".equals(pair.getMemberName())) {
-						xpath = (String) pair.getValue();
-					}
-				}
-			}
-
-			if (PluginUtil.isNullOrEmpty(target))
+			if (PluginUtil.isNullOrEmpty(artefactInfo.target))
 				return null;
 
 			// calculate the hyperlink region
@@ -131,8 +119,8 @@ public class ArtefactDetector extends AbstractHyperlinkDetector implements IHype
 			// IPath artefactPath =
 			// element.getJavaProject().getPath().append(target);
 
-			IFile targetFile = element.getJavaProject().getProject().getFile(target);
-			return new IHyperlink[] { new ArtefactHyperlink(wordRegion, targetFile, xpath) };
+			IFile targetFile = element.getJavaProject().getProject().getFile(artefactInfo.target);
+			return new IHyperlink[] { new ArtefactHyperlink(wordRegion, targetFile, artefactInfo.xpath) };
 		} catch (JavaModelException ex) {
 		}
 

@@ -61,4 +61,34 @@ public class PluginUtil {
 	public static boolean areNotEqual(String s1, String s2) {
 		return !areEqual(s1, s2);
 	}
+
+	
+//	public static String getString(Map<String, Object> map, String name) {
+//		String val = null;
+//		if (map != null && map.containsKey(name)) {
+//			val = (String)map.get(name);
+//		}
+//		return val;
+//	}
+//
+//	public static Boolean getBoolean(Map<String, Object> map, String name) {
+//		Boolean val = false;
+//		if (map != null && map.containsKey(name)) {
+//			Object o = map.get(name);
+//			if(o instanceof Boolean) {
+//				val = (Boolean)o;
+//			} else if(o != null) {
+//				val = new Boolean(o.toString());
+//			}
+//		}
+//		return val;
+//	}
+//
+//	public static Object get(Map<String, Object> map, String name) {
+//		Object val = null;
+//		if (map != null && map.containsKey(name)) {
+//			val = map.get(name);
+//		}
+//		return val;
+//	}
 }

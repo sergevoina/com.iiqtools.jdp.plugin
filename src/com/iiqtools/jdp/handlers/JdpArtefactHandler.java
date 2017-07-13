@@ -13,8 +13,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
@@ -39,18 +37,16 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.iiqtools.jdp.Messages;
-import com.iiqtools.jdp.annotation.EOL;
+import com.iiqtools.jdp.util.ArtefactInfo;
 import com.iiqtools.jdp.util.ArtefactUtil;
 import com.iiqtools.jdp.util.JdtUtil;
 import com.iiqtools.jdp.util.PluginUtil;
 
 /**
- * http://www.vogella.com/tutorials/EclipseJDT/article.html
+ * The handler that generates BeanShell script from a Java class
  * 
- * Our sample handler extends AbstractHandler, an IHandler base class.
- * 
- * @see org.eclipse.core.commands.IHandler
- * @see org.eclipse.core.commands.AbstractHandler
+ * @author Serge Voina
+ *
  */
 public class JdpArtefactHandler extends AbstractHandler {
 
@@ -106,7 +102,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 			}
 		}
 
-		IMarker[] markers = JdtUtil.findJavaProblemMarkers(compilationUnit);
+		IMarker[] markers = JdtUtil.getJavaProblemMarkers(compilationUnit);
 		if (markers.length > 0) {
 			boolean hasErrors = false;
 			// boolean hasWarining = false;
@@ -138,72 +134,46 @@ public class JdpArtefactHandler extends AbstractHandler {
 			// }
 		}
 
-		// TODO: check the java file is saved
-
-		// TODO: check the java class doesn't have errors
-
 		IType topLevelType = JdtUtil.resolveTopLevelType(compilationUnit);
 		if (topLevelType == null) {
 			// TODO:
 			throw new Exception("Cannot find top level type");
 		}
 
-		IAnnotation annotation = topLevelType.getAnnotation("Artefact");
-		if (annotation == null || !annotation.exists()) {
+		// IAnnotation annotation = topLevelType.getAnnotation("Artefact");
+		// if (annotation == null || !annotation.exists()) {
+		// throw new Exception("Cannot find @Artefact annotation");
+		// }
+
+		ArtefactInfo artefactInfo = JdtUtil.getArtefactInfo(topLevelType);
+		if (artefactInfo == null) {
 			throw new Exception("Cannot find @Artefact annotation");
 		}
 
-		String target = null;
-		String xpath = null;
-		EOL eol = null;
-		for (IMemberValuePair pair : annotation.getMemberValuePairs()) {
-			String memberName = pair.getMemberName();
-			if ("target".equals(memberName)) {
-				target = (String) pair.getValue();
-			} else if ("xpath".equals(memberName)) {
-				xpath = (String) pair.getValue();
-			} else if ("eol".equals(memberName)) {
-				String val = (String) pair.getValue();
-				if (val != null && val.startsWith("EOL.")) {
-					val = val.substring(4);
-				}
-				eol = EOL.valueOf(val);
-			}
-		}
+		IFile targetFile = topLevelType.getJavaProject().getProject().getFile(artefactInfo.target);
 
-		IJavaProject javaProject = topLevelType.getJavaProject();
-		
-		IFile targetFile = javaProject.getProject().getFile(target);
+		String script = getIIQScript(compilationUnit, topLevelType, artefactInfo);
 
-//		File projectDir = javaProject.getResource().getLocation().toFile();
-//		if (projectDir == null) {
-//			throw new Exception("Cannot find JavaProject location");
-//		}
-//
-//		File artefactFile = new File(projectDir, target);
-//		if (!artefactFile.exists() || !artefactFile.isFile()) {
-//			throw new Exception("Cannot find IIQ Artefact: " + target);
-//		}
-
-		String script = getIIQScript(compilationUnit, topLevelType);
-
-		ArtefactUtil.updateArtefact(targetFile, xpath, script, eol);
+		ArtefactUtil.updateArtefact(targetFile, script, artefactInfo);
 
 		MessageConsole console = JdtUtil.getConsole("IIQ Tools");
 		if (console != null) {
 			MessageConsoleStream out = console.newMessageStream();
-			out.println("Successfully updated IIQ Artefact: " + target);
+			out.println("Successfully updated IIQ Artefact: " + artefactInfo.target);
 			out.flush();
 			out.close();
 		}
 	}
 
-	private String getIIQScript(ICompilationUnit compilationUnit, IType topLevelType) throws JavaModelException {
+	private String getIIQScript(ICompilationUnit compilationUnit, IType topLevelType, ArtefactInfo artefactInfo)
+			throws JavaModelException {
 
 		final StringBuilder sb = new StringBuilder();
 		sb.append(this.lineSeparator);
 
-		appendHeader(sb, compilationUnit, topLevelType);
+		if (artefactInfo.header) {
+			appendHeader(sb, compilationUnit, topLevelType);
+		}
 
 		appendImportDeclarations(sb, compilationUnit, topLevelType);
 		appendFields(sb, compilationUnit, topLevelType);
@@ -212,7 +182,8 @@ public class JdpArtefactHandler extends AbstractHandler {
 		return sb.toString();
 	}
 
-	private void appendHeader(StringBuilder sb, ICompilationUnit compilationUnit, IType topLevelType) {
+	private void appendHeader(final StringBuilder sb, final ICompilationUnit compilationUnit,
+			final IType topLevelType) {
 		// Generated by IIQ Tools JDP on <Date> from
 		// <Class name>
 
@@ -231,6 +202,10 @@ public class JdpArtefactHandler extends AbstractHandler {
 		for (IMethod method : methods) {
 			if (JdtUtil.hasAnnotation(method, "ArtefactBody")) {
 				bodyMethod = method;
+
+				// TODO:
+				// shiftBodyLeft = true;
+
 			} else {
 				if (!JdtUtil.hasAnnotation(method, "ArtefactIgnore")) {
 					ISourceRange sourceRange = method.getSourceRange();
@@ -249,10 +224,8 @@ public class JdpArtefactHandler extends AbstractHandler {
 						length++;
 					}
 
-					String script = PluginUtil.shiftLeft(cuSource.substring(offset, offset + length));
-					// cuSource
-
-					// String script = method.getSource();
+					String script = cuSource.substring(offset, offset + length);
+					script = PluginUtil.shiftLeft(script);
 					sb.append(script).append(this.lineSeparator).append(this.lineSeparator);
 				}
 			}
@@ -260,6 +233,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 
 		if (bodyMethod != null) {
 			final String methodName = bodyMethod.getElementName();
+
 			CompilationUnit cu = SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, null);
 
 			cu.accept(new ASTVisitor() {
@@ -276,15 +250,15 @@ public class JdpArtefactHandler extends AbstractHandler {
 						try {
 							String script = compilationUnit.getSource();
 							script = script.substring(s + 1, s + l - 2);
+							script = PluginUtil.shiftLeft(script);
+							script = PluginUtil.shiftLeft(script);
 
-							script = PluginUtil.shiftLeft(PluginUtil.shiftLeft(script));
 							sb.append(script);
 						} catch (JavaModelException e) {
 							// TODO Auto-generated catch block
 							// e.printStackTrace();
 						}
 
-						// sb.append(bodyMethod.getSource()).append(this.lineSeparator);
 						sb.append(lineSeparator);
 					}
 					return false;
@@ -293,7 +267,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 		}
 	}
 
-	private void appendFields(StringBuilder sb, ICompilationUnit compilationUnit, IType topLevelType)
+	private void appendFields(final StringBuilder sb, final ICompilationUnit compilationUnit, final IType topLevelType)
 			throws JavaModelException {
 
 		boolean appendEol = false;
@@ -301,7 +275,8 @@ public class JdpArtefactHandler extends AbstractHandler {
 		for (IField field : fields) {
 			IAnnotation annotation = field.getAnnotation("ArtefactIgnore");
 			if (!annotation.exists()) {
-				String script = PluginUtil.shiftLeft(field.getSource());
+				String script = field.getSource();
+				script = PluginUtil.shiftLeft(script);
 				sb.append(script).append(this.lineSeparator);
 				appendEol = true;
 			}

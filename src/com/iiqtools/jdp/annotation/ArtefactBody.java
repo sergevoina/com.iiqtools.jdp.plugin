@@ -7,6 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
+ * Marker annotation that indicates the target BeanShell main script. The method
+ * declaration is removed and only the method body is copied to the target
+ * script.
  * 
  * @author Serge Voina
  *
@@ -14,5 +17,4 @@ import java.lang.annotation.Target;
 @Retention(CLASS)
 @Target(METHOD)
 public @interface ArtefactBody {
-
 }

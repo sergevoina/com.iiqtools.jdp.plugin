@@ -32,12 +32,21 @@
             categoryId="com.iiqtools.jdp.commands.category"
             id="com.iiqtools.jdp.commands.artefactCommand">
       </command>
+      <command
+            name="Show Diff"
+            categoryId="com.iiqtools.jdp.commands.category"
+            id="com.iiqtools.jdp.commands.compareCommand">
+      </command>
    </extension>
    
    <extension point="org.eclipse.ui.handlers">
       <handler
             commandId="com.iiqtools.jdp.commands.artefactCommand"
             class="com.iiqtools.jdp.handlers.JdpArtefactHandler">
+      </handler>
+      <handler
+            commandId="com.iiqtools.jdp.commands.compareCommand"
+            class="com.iiqtools.jdp.handlers.CompareHadler">
       </handler>
    </extension>
    
@@ -76,6 +85,12 @@
                   icon="icons/sample.gif"
                   tooltip="IIQ Artefact"
                   id="com.iiqtools.jdp.toolbars.artefactCommand">
+            </command>
+            <command
+                  commandId="com.iiqtools.jdp.commands.compareCommand"
+                  icon="icons/sample.gif"
+                  tooltip="Show Difference"
+                  id="com.iiqtools.jdp.toolbars.compareCommand">
             </command>
          </toolbar>
       </menuContribution>

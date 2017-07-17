@@ -140,12 +140,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 			throw new Exception("Cannot find top level type");
 		}
 
-		// IAnnotation annotation = topLevelType.getAnnotation("Artefact");
-		// if (annotation == null || !annotation.exists()) {
-		// throw new Exception("Cannot find @Artefact annotation");
-		// }
-
-		ArtefactInfo artefactInfo = JdtUtil.getArtefactInfo(topLevelType);
+		ArtefactInfo artefactInfo = ArtefactInfo.parse(topLevelType);
 		if (artefactInfo == null) {
 			throw new Exception("Cannot find @Artefact annotation");
 		}

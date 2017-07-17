@@ -17,7 +17,6 @@ import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.iiqtools.jdp.util.ArtefactInfo;
-import com.iiqtools.jdp.util.JdtUtil;
 import com.iiqtools.jdp.util.PluginUtil;
 
 /**
@@ -102,7 +101,7 @@ public class ArtefactDetector extends AbstractHyperlinkDetector implements IHype
 				return null;
 
 			// Get target property value
-			ArtefactInfo artefactInfo = JdtUtil.getArtefactInfo((IAnnotatable) element);
+			ArtefactInfo artefactInfo = ArtefactInfo.parse(element);
 
 			if (artefactInfo == null)
 				return null;

@@ -8,15 +8,12 @@ import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelMarker;
-import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-
-import com.iiqtools.jdp.annotation.EOL;
 
 public class JdtUtil {
 	/**
@@ -60,43 +57,6 @@ public class JdtUtil {
 		}
 
 		return res;
-	}
-
-	public static ArtefactInfo getArtefactInfo(final IAnnotatable annotatable) throws JavaModelException {
-		Assert.isNotNull(annotatable);
-
-		ArtefactInfo info = null;
-
-		IAnnotation annotation = annotatable.getAnnotation("Artefact");
-		if (annotation != null && annotation.exists()) {
-			String target = null;
-			String xpath = null;
-			// default values
-			boolean header = true;
-			EOL eol = EOL.Target;
-
-			for (IMemberValuePair pair : annotation.getMemberValuePairs()) {
-				String memberName = pair.getMemberName();
-				Object value = pair.getValue();
-
-				if ("target".equals(memberName)) {
-					target = (String) value;
-				} else if ("xpath".equals(memberName)) {
-					xpath = (String) value;
-				} else if ("eol".equals(memberName)) {
-					String val = (String) value;
-					if (val != null && val.startsWith("EOL.")) {
-						val = val.substring(4);
-					}
-					eol = EOL.valueOf(val);
-				} else if ("header".equals(memberName)) {
-					header = (Boolean) value;
-				}
-			}
-			info = new ArtefactInfo(target, xpath, header, eol);
-		}
-
-		return info;
 	}
 
 	public static MessageConsole getConsole(final String name) {

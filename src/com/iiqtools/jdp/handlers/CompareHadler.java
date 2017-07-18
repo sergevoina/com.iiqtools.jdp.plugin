@@ -10,9 +10,13 @@ import org.eclipse.compare.IModificationDate;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.graphics.Image;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -20,7 +24,7 @@ import org.w3c.dom.Node;
 import com.iiqtools.jdp.util.ArtefactInfo;
 import com.iiqtools.jdp.util.ArtefactUtil;
 
-public class CompareHadler extends JdpArtefactHandler {
+public class CompareHadler extends ArtefactHandler {
 
 	static class CompareItem implements IStreamContentAccessor, ITypedElement, IModificationDate {
 		private String contents, name;
@@ -75,8 +79,22 @@ public class CompareHadler extends JdpArtefactHandler {
 		}
 	}
 
+	protected boolean handleTreeSelection(ExecutionEvent event, ITreeSelection currentSelection) throws Exception {
+		boolean handled = false;
+
+		TreePath[] paths = ((ITreeSelection) currentSelection).getPaths();
+		if (paths != null && paths.length == 1) {
+			Object lastSegment = paths[0].getLastSegment();
+			if (lastSegment instanceof ICompilationUnit) {
+				handled = handleCompilationUnit(event, (ICompilationUnit) lastSegment);
+			}
+		} 
+
+		return handled;
+	}
+
 	@Override
-	protected void updateArtefact(IFile targetFile, String javaScript, ArtefactInfo artefactInfo) throws Exception {
+	protected void processScript(IFile targetFile, String newScript, ArtefactInfo artefactInfo) throws Exception {
 
 		Document document = ArtefactUtil.getDocument(targetFile);
 		if (document == null) {
@@ -94,13 +112,8 @@ public class CompareHadler extends JdpArtefactHandler {
 			throw new Exception(sb.toString());
 		}
 
-		String xmlScript = node.getTextContent();
+		String oldScript = node.getTextContent();
 
-		CompareUI.openCompareEditor(new CompareInput(javaScript, xmlScript));
-
-		// if (!PluginUtil.areEqual(javaScript, xmlScript)) {
-		// MessageDialog.openInformation(window.getShell(),
-		// Messages.messageDialogTitle, e.getMessage());
-		// }
+		CompareUI.openCompareEditor(new CompareInput(newScript, oldScript));
 	}
 }

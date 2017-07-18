@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
+   <extension 
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
             id="com.iiqtools.jdp.CLASSPATH_CONTAINER"
             class="com.iiqtools.jdp.classpath.JdpClasspathContainerInitializer"/>
    </extension>
    
-   <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+   <extension 
+         point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
             id="com.iiqtools.jdp.CLASSPATH_CONTAINER"
             name="IIQ Tools Library"
             class="com.iiqtools.jdp.classpath.JdpClasspathContainerPage"/>
    </extension>
 
-   <extension point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
+   <extension 
+         point="org.eclipse.ui.workbench.texteditor.hyperlinkDetectors">
       <hyperlinkDetector id="com.iiqtools.jdp.hyperlinkDetector.ArtefactDetector"
             name="Preferences" targetId="org.eclipse.jdt.ui.javaCode"
             class="com.iiqtools.jdp.hyperlinkDetector.ArtefactDetector"
@@ -22,7 +25,8 @@
       </hyperlinkDetector>
    </extension>
    
-   <extension point="org.eclipse.ui.commands">
+   <extension 
+         point="org.eclipse.ui.commands">
       <category 
             name="IIQ Tools"
             id="com.iiqtools.jdp.commands.category">
@@ -39,10 +43,11 @@
       </command>
    </extension>
    
-   <extension point="org.eclipse.ui.handlers">
+   <extension 
+         point="org.eclipse.ui.handlers">
       <handler
             commandId="com.iiqtools.jdp.commands.artefactCommand"
-            class="com.iiqtools.jdp.handlers.JdpArtefactHandler">
+            class="com.iiqtools.jdp.handlers.ArtefactHandler">
       </handler>
       <handler
             commandId="com.iiqtools.jdp.commands.compareCommand"
@@ -50,7 +55,8 @@
       </handler>
    </extension>
    
-   <extension point="org.eclipse.ui.bindings">
+   <extension 
+         point="org.eclipse.ui.bindings">
       <key
             commandId="com.iiqtools.jdp.commands.artefactCommand"
             contextId="org.eclipse.ui.contexts.window"
@@ -59,23 +65,8 @@
       </key>
    </extension>
    
-   <extension point="org.eclipse.ui.menus">
-      <!--
-      <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu
-               label="IIQ Tools"
-               mnemonic="M"
-               id="com.iiqtools.jdp.menus.artefactMenu">
-            <command
-                  id="com.iiqtools.jdp.menus.artefactCommand"
-                  commandId="com.iiqtools.jdp.commands.artefactCommand"
-                  mnemonic="S">
-            </command>
-         </menu>
-      </menuContribution>
-      -->
-      
+   <extension 
+         point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar

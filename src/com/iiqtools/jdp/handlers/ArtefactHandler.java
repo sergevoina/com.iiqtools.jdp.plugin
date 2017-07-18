@@ -48,11 +48,11 @@ import com.iiqtools.jdp.util.PluginUtil;
  * @author Serge Voina
  *
  */
-public class JdpArtefactHandler extends AbstractHandler {
+public class ArtefactHandler extends AbstractHandler {
 
-	final String lineSeparator;
+	protected final String lineSeparator;
 
-	public JdpArtefactHandler() {
+	public ArtefactHandler() {
 		this.lineSeparator = "\n";
 	}
 
@@ -61,17 +61,24 @@ public class JdpArtefactHandler extends AbstractHandler {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 
 		try {
+			boolean handled = false;
+
 			ISelection currentSelection = HandlerUtil.getCurrentSelection(event);
 			if (currentSelection instanceof ITreeSelection) {
-				handleTreeSelection(event, (ITreeSelection) currentSelection);
+				handled = handleTreeSelection(event, (ITreeSelection) currentSelection);
 			} else if (currentSelection instanceof ITextSelection) {
 				IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
 				if (activeEditor != null) {
 					IJavaElement javaElement = JavaUI.getEditorInputJavaElement(activeEditor.getEditorInput());
 					if (javaElement instanceof ICompilationUnit) {
-						handleCompilationUnit(event, (ICompilationUnit) javaElement);
+						handled = handleCompilationUnit(event, (ICompilationUnit) javaElement);
 					}
 				}
+			}
+
+			if (!handled) {
+				MessageDialog.openInformation(window.getShell(), Messages.messageDialogTitle,
+						Messages.selectionIsNotSupportedError);
 			}
 		} catch (Exception e) {
 			MessageDialog.openError(window.getShell(), Messages.messageDialogTitle, e.getMessage());
@@ -79,93 +86,26 @@ public class JdpArtefactHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected void handleTreeSelection(ExecutionEvent event, ITreeSelection currentSelection) throws Exception {
+	protected boolean handleTreeSelection(ExecutionEvent event, ITreeSelection currentSelection) throws Exception {
+		boolean handled = false;
+
 		TreePath[] paths = ((ITreeSelection) currentSelection).getPaths();
-		if (paths != null && paths.length > 0) {
-			Object lastSegment = paths[0].getLastSegment();
-			if (lastSegment instanceof ICompilationUnit) {
-				handleCompilationUnit(event, (ICompilationUnit) lastSegment);
+		if (paths != null) {
+			for (TreePath path : paths) {
+				Object lastSegment = path.getLastSegment();
+				if (lastSegment instanceof ICompilationUnit) {
+					handled = handleCompilationUnit(event, (ICompilationUnit) lastSegment);
+				}
 			}
-
 			// TODO: package
-
 			// TODO: project
 		}
+
+		return handled;
 	}
 
-	protected void handleCompilationUnit(ExecutionEvent event, ICompilationUnit compilationUnit) throws Exception {
-
-		if (compilationUnit instanceof IOpenable) {
-			IOpenable openable = (IOpenable) compilationUnit;
-			if (openable.hasUnsavedChanges()) {
-				throw new Exception(Messages.hasUnsavedChangesError);
-			}
-		}
-
-		IMarker[] markers = JdtUtil.getJavaProblemMarkers(compilationUnit);
-		if (markers.length > 0) {
-			boolean hasErrors = false;
-			// boolean hasWarining = false;
-			StringBuilder sb = new StringBuilder();
-			sb.append("Please fix all errors first:");
-
-			for (IMarker marker : markers) {
-				Map<String, Object> map = marker.getAttributes();
-
-				int severity = (int) map.get("severity");
-
-				if (severity == IMarker.SEVERITY_ERROR) {
-					hasErrors = true;
-					sb.append(System.lineSeparator()).append(map.get("message"));
-				}
-				// if (severity == IMarker.SEVERITY_WARNING) {
-				// hasWarining = true;
-				// }
-			}
-
-			if (hasErrors) {
-				throw new Exception(Messages.hasJavaProblemsError);
-			}
-
-			// if (hasWarining) {
-			// MessageDialog.openInformation(window.getShell(), "Custom
-			// Container",
-			// "The compilation unit has warnings!");
-			// }
-		}
-
-		IType topLevelType = JdtUtil.resolveTopLevelType(compilationUnit);
-		if (topLevelType == null) {
-			// TODO:
-			throw new Exception("Cannot find top level type");
-		}
-
-		ArtefactInfo artefactInfo = ArtefactInfo.parse(topLevelType);
-		if (artefactInfo == null) {
-			throw new Exception("Cannot find @Artefact annotation");
-		}
-
-		IFile targetFile = topLevelType.getJavaProject().getProject().getFile(artefactInfo.target);
-
-		String script = getIIQScript(compilationUnit, topLevelType, artefactInfo);
-
-		updateArtefact(targetFile, script, artefactInfo);
-
-		MessageConsole console = JdtUtil.getConsole("IIQ Tools");
-		if (console != null) {
-			MessageConsoleStream out = console.newMessageStream();
-			out.println("Successfully updated IIQ Artefact: " + artefactInfo.target);
-			out.flush();
-			out.close();
-		}
-	}
-
-	protected void updateArtefact(IFile targetFile, String script, ArtefactInfo artefactInfo) throws Exception {
-		ArtefactUtil.updateArtefact(targetFile, script, artefactInfo);
-	}
-
-	protected String getIIQScript(ICompilationUnit compilationUnit, IType topLevelType, ArtefactInfo artefactInfo)
-			throws JavaModelException {
+	protected String generateScript(ICompilationUnit compilationUnit, IType topLevelType, ArtefactInfo artefactInfo)
+			throws Exception {
 
 		final StringBuilder sb = new StringBuilder();
 		sb.append(this.lineSeparator);
@@ -192,7 +132,7 @@ public class JdpArtefactHandler extends AbstractHandler {
 	}
 
 	protected void appendMethods(final StringBuilder sb, final ICompilationUnit compilationUnit,
-			final IType topLevelType) throws JavaModelException {
+			final IType topLevelType) throws Exception {
 
 		final String cuSource = compilationUnit.getSource();
 		IMethod bodyMethod = null;
@@ -233,7 +173,10 @@ public class JdpArtefactHandler extends AbstractHandler {
 		if (bodyMethod != null) {
 			final String methodName = bodyMethod.getElementName();
 
-			CompilationUnit cu = SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, null);
+			CompilationUnit cu = SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_YES, null);
+			if (cu == null) {
+				throw new Exception("Failed to get a compilation unit AST for the given Java element.");
+			}
 
 			cu.accept(new ASTVisitor() {
 				@Override
@@ -302,4 +245,77 @@ public class JdpArtefactHandler extends AbstractHandler {
 			sb.append(this.lineSeparator);
 		}
 	}
+
+	protected boolean handleCompilationUnit(ExecutionEvent event, ICompilationUnit compilationUnit) throws Exception {
+
+		if (compilationUnit instanceof IOpenable) {
+			IOpenable openable = (IOpenable) compilationUnit;
+			if (openable.hasUnsavedChanges()) {
+				throw new Exception(Messages.hasUnsavedChangesError);
+			}
+		}
+
+		IMarker[] markers = JdtUtil.getJavaProblemMarkers(compilationUnit);
+		if (markers.length > 0) {
+			boolean hasErrors = false;
+			// boolean hasWarining = false;
+			StringBuilder sb = new StringBuilder();
+			sb.append("Please fix all errors first:");
+
+			for (IMarker marker : markers) {
+				Map<String, Object> map = marker.getAttributes();
+
+				int severity = (int) map.get("severity");
+
+				if (severity == IMarker.SEVERITY_ERROR) {
+					hasErrors = true;
+					sb.append(System.lineSeparator()).append(map.get("message"));
+				}
+				// if (severity == IMarker.SEVERITY_WARNING) {
+				// hasWarining = true;
+				// }
+			}
+
+			if (hasErrors) {
+				throw new Exception(Messages.hasJavaProblemsError);
+			}
+
+			// if (hasWarining) {
+			// MessageDialog.openInformation(window.getShell(), "Custom
+			// Container",
+			// "The compilation unit has warnings!");
+			// }
+		}
+
+		IType topLevelType = JdtUtil.resolveTopLevelType(compilationUnit);
+		if (topLevelType == null) {
+			throw new Exception(Messages.cannotFindTopLevelTypeError);
+		}
+
+		ArtefactInfo artefactInfo = ArtefactInfo.parse(topLevelType);
+		if (artefactInfo == null) {
+			throw new Exception(Messages.cannotFindArtefactAnnotationError);
+		}
+
+		String script = generateScript(compilationUnit, topLevelType, artefactInfo);
+
+		IFile targetFile = topLevelType.getJavaProject().getProject().getFile(artefactInfo.target);
+
+		processScript(targetFile, script, artefactInfo);
+
+		return true;
+	}
+
+	protected void processScript(IFile targetFile, String script, ArtefactInfo artefactInfo) throws Exception {
+		ArtefactUtil.updateArtefact(targetFile, script, artefactInfo);
+
+		MessageConsole console = JdtUtil.getConsole("IIQ Tools");
+		if (console != null) {
+			MessageConsoleStream out = console.newMessageStream();
+			out.println("Successfully updated IIQ Artefact: " + artefactInfo.target);
+			out.flush();
+			out.close();
+		}
+	}
+
 }

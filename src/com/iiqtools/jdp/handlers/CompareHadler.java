@@ -10,7 +10,6 @@ import org.eclipse.compare.IModificationDate;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
-import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -70,10 +69,9 @@ public class CompareHadler extends JdpArtefactHandler {
 		}
 
 		protected Object prepareInput(IProgressMonitor pm) {
-			CompareItem ancestor = new CompareItem("Common", this.left, 0);
 			CompareItem left = new CompareItem("Left", this.left, 0);
 			CompareItem right = new CompareItem("Right", this.right, 0);
-			return new DiffNode(null, Differencer.CONFLICTING, ancestor, left, right);
+			return new DiffNode(left, right);
 		}
 	}
 

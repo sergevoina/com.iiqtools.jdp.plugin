@@ -1,6 +1,9 @@
 package com.iiqtools.jdp.handlers;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -8,6 +11,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -51,9 +55,25 @@ import com.iiqtools.jdp.util.PluginUtil;
 public class ArtefactHandler extends AbstractHandler {
 
 	protected final String lineSeparator;
+	protected final List<String> importsToIgnore;
 
 	public ArtefactHandler() {
 		this.lineSeparator = "\n";
+
+		List<String> list = new ArrayList<String>();
+		list.add("com.iiqtools.jdp.annotation");
+		// default imports in BeanShell
+		// http://beanshell.org/manual/bshmanual.html#Importing_Classes_and_Packages
+		list.add("javax.swing.event");
+		list.add("javax.swing");
+		list.add("java.awt.event");
+		list.add("java.awt");
+		list.add("java.net");
+		list.add("java.util");
+		list.add("java.io");
+		list.add("java.lang");
+
+		this.importsToIgnore = Collections.unmodifiableList(list);
 	}
 
 	@Override
@@ -231,19 +251,81 @@ public class ArtefactHandler extends AbstractHandler {
 
 	protected void appendImportDeclarations(StringBuilder sb, ICompilationUnit compilationUnit, IType topLevelType)
 			throws JavaModelException {
-		boolean appendEol = false;
 
+		List<String> listOfImports = new ArrayList<String>();
 		IImportDeclaration[] imports = compilationUnit.getImports();
-		for (IImportDeclaration importDeclaration : imports) {
-			String elementName = importDeclaration.getElementName();
-			if (elementName != null && !elementName.startsWith("com.iiqtools.jdp.annotation.")) {
-				sb.append("import ").append(importDeclaration.getElementName()).append(";").append(this.lineSeparator);
+		if (imports != null) {
+			for (IImportDeclaration importDeclaration : imports) {
+				String s = importDeclaration.getElementName();
+				if (s != null) {
+					s = s.trim();
+				}
+				if (PluginUtil.isNotNullOrEmpty(s)) {
+					listOfImports.add(importDeclaration.getElementName());
+				}
+			}
+		}
+
+		appendImportDeclarations(sb, listOfImports, true, true, true);
+	}
+
+	protected void appendImportDeclarations(StringBuilder sb, List<String> listOfImports, boolean sort, boolean excl,
+			boolean split) {
+		Assert.isNotNull(sb);
+		Assert.isNotNull(listOfImports);
+
+		if (sort) {
+			Collections.sort(listOfImports);
+		}
+
+		boolean appendEol = false;
+		String prev = null;
+		for (String s : listOfImports) {
+			if (!excl || !ignore(s)) {
+				if (needSplit(prev, s)) {
+					sb.append(this.lineSeparator);
+				}
+
+				sb.append("import ").append(s).append(";").append(this.lineSeparator);
+				prev = s;
 				appendEol = true;
 			}
 		}
+
 		if (appendEol) {
 			sb.append(this.lineSeparator);
 		}
+	}
+
+	protected boolean needSplit(String prev, String next) {
+		if (prev != null && next != null) {
+			int prevInd = prev.indexOf('.');
+			if (prevInd != -1) {
+				prev = prev.substring(0, prevInd);
+			}
+			int nextInd = next.indexOf('.');
+			if (nextInd != -1) {
+				next = next.substring(0, nextInd);
+			}
+			return !prev.equals(next);
+		}
+		return false;
+	}
+
+	protected boolean ignore(String imp) {
+		if (imp != null) {
+			for (String s : this.importsToIgnore) {
+				if (imp.startsWith(s)) {
+					String suffix = imp.substring(s.length());
+					// first char must be '.'
+					if ((suffix.length() > 1) && (suffix.charAt(0) == '.')) {
+						// no more dots
+						return (suffix.indexOf('.', 1) == -1);
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	protected boolean handleCompilationUnit(ExecutionEvent event, ICompilationUnit compilationUnit) throws Exception {

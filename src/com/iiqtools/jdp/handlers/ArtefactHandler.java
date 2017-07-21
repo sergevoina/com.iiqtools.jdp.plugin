@@ -383,12 +383,12 @@ public class ArtefactHandler extends AbstractHandler {
 
 		IFile targetFile = topLevelType.getJavaProject().getProject().getFile(artefactInfo.target);
 
-		processScript(targetFile, script, artefactInfo);
+		processScript(compilationUnit, targetFile, script, artefactInfo);
 
 		return true;
 	}
 
-	protected void processScript(IFile targetFile, String script, ArtefactInfo artefactInfo) throws Exception {
+	protected void processScript(ICompilationUnit compilationUnit, IFile targetFile, String script, ArtefactInfo artefactInfo) throws Exception {
 		ArtefactUtil.updateArtefact(targetFile, script, artefactInfo);
 
 		MessageConsole console = JdtUtil.getConsole("IIQ Tools");

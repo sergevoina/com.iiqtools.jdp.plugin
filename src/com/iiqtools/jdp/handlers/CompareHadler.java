@@ -65,8 +65,8 @@ public class CompareHadler extends ArtefactHandler {
 		private final String left;
 		private final String right;
 
-		public CompareInput(String left, String right) {
-			super(new CompareConfiguration());
+		public CompareInput(CompareConfiguration config, String left, String right) {
+			super(config);
 
 			this.left = left;
 			this.right = right;
@@ -88,13 +88,14 @@ public class CompareHadler extends ArtefactHandler {
 			if (lastSegment instanceof ICompilationUnit) {
 				handled = handleCompilationUnit(event, (ICompilationUnit) lastSegment);
 			}
-		} 
+		}
 
 		return handled;
 	}
 
 	@Override
-	protected void processScript(IFile targetFile, String newScript, ArtefactInfo artefactInfo) throws Exception {
+	protected void processScript(ICompilationUnit compilationUnit, IFile targetFile, String newScript,
+			ArtefactInfo artefactInfo) throws Exception {
 
 		Document document = ArtefactUtil.getDocument(targetFile);
 		if (document == null) {
@@ -114,6 +115,22 @@ public class CompareHadler extends ArtefactHandler {
 
 		String oldScript = node.getTextContent();
 
-		CompareUI.openCompareEditor(new CompareInput(newScript, oldScript));
+		CompareConfiguration configuration = new CompareConfiguration();
+
+		String leftLabel = compilationUnit.getPath().toFile().getName();
+		configuration.setLeftLabel(leftLabel);
+
+		String rightLabel = new StringBuilder().append(targetFile.getName()).append("::").append(artefactInfo.xpath)
+				.toString();
+		configuration.setRightLabel(rightLabel);
+
+		CompareUI.openCompareEditor(new CompareInput(configuration, removeCr(newScript), removeCr(oldScript)));
+	}
+
+	protected String removeCr(String s) {
+		if (s == null) {
+			return null;
+		}
+		return s.replaceAll("\\r", "");
 	}
 }

@@ -12,7 +12,7 @@
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
             id="com.iiqtools.jdp.CLASSPATH_CONTAINER"
-            name="IIQ Tools Library"
+            name="%classpathContainerPage.name"
             class="com.iiqtools.jdp.classpath.JdpClasspathContainerPage"/>
    </extension>
 
@@ -37,6 +37,11 @@
             id="com.iiqtools.jdp.commands.artefactCommand">
       </command>
       <command
+            name="Open Artefact"
+            categoryId="com.iiqtools.jdp.commands.category"
+            id="com.iiqtools.jdp.commands.openCommand">
+      </command>
+      <command
             name="Show Diff"
             categoryId="com.iiqtools.jdp.commands.category"
             id="com.iiqtools.jdp.commands.compareCommand">
@@ -48,6 +53,10 @@
       <handler
             commandId="com.iiqtools.jdp.commands.artefactCommand"
             class="com.iiqtools.jdp.handlers.ArtefactHandler">
+      </handler>
+      <handler
+            commandId="com.iiqtools.jdp.commands.openCommand"
+            class="com.iiqtools.jdp.handlers.OpenHadler">
       </handler>
       <handler
             commandId="com.iiqtools.jdp.commands.compareCommand"
@@ -73,14 +82,20 @@
                id="com.iiqtools.jdp.toolbars.sampleToolbar">
             <command
                   commandId="com.iiqtools.jdp.commands.artefactCommand"
-                  icon="icons/sample.gif"
-                  tooltip="IIQ Artefact"
+                  icon="icons/beanshell.png"
+                  tooltip="%generateBeanShell"
                   id="com.iiqtools.jdp.toolbars.artefactCommand">
             </command>
             <command
+                  commandId="com.iiqtools.jdp.commands.openCommand"
+                  icon="icons/open.gif"
+                  tooltip="%openArtefact"
+                  id="com.iiqtools.jdp.toolbars.openCommand">
+            </command>
+            <command
                   commandId="com.iiqtools.jdp.commands.compareCommand"
-                  icon="icons/sample.gif"
-                  tooltip="Show Difference"
+                  icon="icons/compare.gif"
+                  tooltip="%showDifference"
                   id="com.iiqtools.jdp.toolbars.compareCommand">
             </command>
          </toolbar>

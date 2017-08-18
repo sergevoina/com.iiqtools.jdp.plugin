@@ -36,4 +36,6 @@ public class Messages extends NLS {
 	public static String selectionIsNotSupportedError;
 	public static String cannotFindTopLevelTypeError;
 	public static String cannotFindArtefactAnnotationError;
+	
+	public static String basicStructuralValidation;
 }

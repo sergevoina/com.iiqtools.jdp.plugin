@@ -23,6 +23,7 @@ import org.w3c.dom.Node;
 
 import com.iiqtools.jdp.util.ArtefactInfo;
 import com.iiqtools.jdp.util.ArtefactUtil;
+import com.iiqtools.jdp.util.BshScriptBuilder;
 
 public class CompareHadler extends ArtefactHandler {
 
@@ -36,26 +37,27 @@ public class CompareHadler extends ArtefactHandler {
 			this.time = time;
 		}
 
+		@Override
 		public InputStream getContents() throws CoreException {
 			return new ByteArrayInputStream(contents.getBytes());
 		}
 
+		@Override
 		public Image getImage() {
 			return null;
 		}
 
+		@Override
 		public long getModificationDate() {
 			return time;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
-		public String getString() {
-			return contents;
-		}
-
+		@Override
 		public String getType() {
 			return ITypedElement.TEXT_TYPE;
 		}
@@ -72,6 +74,7 @@ public class CompareHadler extends ArtefactHandler {
 			this.right = right;
 		}
 
+		@Override
 		protected Object prepareInput(IProgressMonitor pm) {
 			CompareItem left = new CompareItem("Left", this.left, 0);
 			CompareItem right = new CompareItem("Right", this.right, 0);
@@ -79,6 +82,7 @@ public class CompareHadler extends ArtefactHandler {
 		}
 	}
 
+	@Override
 	protected boolean handleTreeSelection(ExecutionEvent event, ITreeSelection currentSelection) throws Exception {
 		boolean handled = false;
 
@@ -94,8 +98,12 @@ public class CompareHadler extends ArtefactHandler {
 	}
 
 	@Override
-	protected void processScript(ICompilationUnit compilationUnit, IFile targetFile, String newScript,
-			ArtefactInfo artefactInfo) throws Exception {
+	protected boolean handleCompilationUnit(ExecutionEvent event, ICompilationUnit compilationUnit) throws Exception {
+		BshScriptBuilder bshScript = BshScriptBuilder.parse(compilationUnit);
+
+		IFile targetFile = bshScript.getTargetFile();
+		String newScript = bshScript.getScript();
+		ArtefactInfo artefactInfo = bshScript.getArtefactInfo();
 
 		Document document = ArtefactUtil.getDocument(targetFile);
 		if (document == null) {
@@ -125,8 +133,10 @@ public class CompareHadler extends ArtefactHandler {
 		configuration.setRightLabel(rightLabel);
 
 		CompareUI.openCompareEditor(new CompareInput(configuration, removeCr(newScript), removeCr(oldScript)));
+		
+		return true;
 	}
-
+	
 	protected String removeCr(String s) {
 		if (s == null) {
 			return null;

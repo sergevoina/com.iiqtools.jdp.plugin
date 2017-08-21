@@ -212,14 +212,28 @@ public class BshScriptBuilder {
 				bodyMethod = method;
 			} else if (JdtUtil.hasAnnotation(method, "ArtefactScript")) {
 
-			} else {
-				if (!JdtUtil.hasAnnotation(method, "ArtefactIgnore")) {
-					ISourceRange sourceRange = roundUpOffset(method.getSourceRange());
-
-					validateAndAppendBlock(sb, sourceRange, 1);
-
-					sb.append(this.lineSeparator).append(this.lineSeparator);
+				// currently it ignores the source method completely and uses the annotation's value.
+				// However the annotation's value is validated for BeanShell syntax
+				ArtefactScriptInfo artefactScript = ArtefactScriptInfo.parse(method);
+				if (artefactScript == null) {
+					throw new Exception(
+							"Failed to parse ArtefactScript annotation on method " + method.getElementName());
 				}
+
+				ISourceRange sourceRange = artefactScript.annotation.getSourceRange();
+				validateSyntax(artefactScript.value, sourceRange.getOffset());
+
+				sb.append(lineSeparator).append(artefactScript.value).append(lineSeparator);
+
+				// TODO: the better solution would be to replace the method's body 
+				// with the annotation's value and remove ArtefactScript annotation
+
+			} else if (!JdtUtil.hasAnnotation(method, "ArtefactIgnore")) {
+				ISourceRange sourceRange = roundUpOffset(method.getSourceRange());
+
+				validateAndAppendBlock(sb, sourceRange, 1);
+
+				sb.append(this.lineSeparator).append(this.lineSeparator);
 			}
 		}
 
@@ -234,7 +248,7 @@ public class BshScriptBuilder {
 			cu.accept(new ASTVisitor() {
 				@Override
 				public boolean visit(MethodDeclaration node) {
-
+				
 					SimpleName simpleName = node.getName();
 					if (simpleName.toString().equals(methodName)) {
 						Block block = node.getBody();

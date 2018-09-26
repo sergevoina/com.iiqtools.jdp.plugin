@@ -23,4 +23,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Copyright: serge.voina@gmail.com
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
+Import-Package: org.apache.commons.lang3.text;version="3.1.0"
 

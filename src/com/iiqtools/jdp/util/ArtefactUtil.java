@@ -148,11 +148,13 @@ public class ArtefactUtil {
 	}
 
 	public static void writeDocument(final Document xmlDoc, final OutputStream fs, String lineSeparator)
-			throws TransformerException {
+			throws TransformerException, IOException {
 
-		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		// transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		// we'll print XML declaration followed by new line
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
 		DocumentType doctype = xmlDoc.getDoctype();
 		if (doctype != null) {
@@ -180,6 +182,8 @@ public class ArtefactUtil {
 				}
 			}
 		};
+
+		os.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes());
 
 		// remove standalone="no" from XML declaration
 		xmlDoc.setXmlStandalone(true);

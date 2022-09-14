@@ -21,12 +21,13 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import com.iiqtools.jdp.Messages;
 
@@ -136,9 +137,9 @@ public class BshScriptBuilder {
 			StrSubstitutor substitutor = new StrSubstitutor(valueMap);
 
 			String header = substitutor.replace(this.artefactInfo.headerText);
-			
+
 			header = header.replace("/*", "/@").replace("*/", "@/");
-			
+
 			sb.append("/* ").append(header).append(" */").append(this.lineSeparator);
 
 		}
@@ -252,10 +253,16 @@ public class BshScriptBuilder {
 			}
 		}
 
+		// we want only inner body, without method declaration
 		if (bodyMethod != null) {
 			final String methodName = bodyMethod.getElementName();
 
-			CompilationUnit cu = SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_YES, null);
+			ASTParser parser = ASTParser.newParser(AST.JLS_Latest);
+			parser.setKind(ASTParser.K_COMPILATION_UNIT);
+			parser.setSource(compilationUnit);
+			parser.setResolveBindings(true);
+			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
 			if (cu == null) {
 				throw new Exception("Failed to get a compilation unit AST for the given Java element.");
 			}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IdentityIQ Java Development Plugin
 Bundle-SymbolicName: com.iiqtools.jdp;singleton:=true
-Bundle-Version: 1.0.1
+Bundle-Version: 1.0.2
 Bundle-Vendor: IIQ Tools
 Require-Bundle: 
  org.eclipse.core.resources,
@@ -18,11 +18,13 @@ Require-Bundle:
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench,
- org.eclipse.ui.workbench.texteditor
+ org.eclipse.ui.workbench.texteditor,
+ org.apache.commons.lang3;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Copyright: serge.voina@gmail.com
+Bundle-ClassPath: lib/commons-text-1.9.jar,
+ .
+Bundle-Activator: com.iiqtools.jdp.IIQToolsPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Import-Package: org.apache.commons.lang3.text;version="3.1.0"
 Automatic-Module-Name: com.iiqtools.jdp
-

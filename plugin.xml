@@ -42,6 +42,11 @@
             id="com.iiqtools.jdp.commands.openCommand">
       </command>
       <command
+            name="Deploy Artefact"
+            categoryId="com.iiqtools.jdp.commands.category"
+            id="com.iiqtools.jdp.commands.deployCommand">
+      </command>
+      <command
             name="Show Diff"
             categoryId="com.iiqtools.jdp.commands.category"
             id="com.iiqtools.jdp.commands.compareCommand">
@@ -57,6 +62,10 @@
       <handler
             commandId="com.iiqtools.jdp.commands.openCommand"
             class="com.iiqtools.jdp.handlers.OpenHadler">
+      </handler>
+      <handler
+            commandId="com.iiqtools.jdp.commands.deployCommand"
+            class="com.iiqtools.jdp.handlers.DeployHadler">
       </handler>
       <handler
             commandId="com.iiqtools.jdp.commands.compareCommand"
@@ -93,6 +102,12 @@
                   id="com.iiqtools.jdp.toolbars.openCommand">
             </command>
             <command
+                  commandId="com.iiqtools.jdp.commands.deployCommand"
+                  icon="icons/deploy.png"
+                  tooltip="%deployArtefact"
+                  id="com.iiqtools.jdp.toolbars.deployCommand">
+            </command>
+            <command
                   commandId="com.iiqtools.jdp.commands.compareCommand"
                   icon="icons/compare.gif"
                   tooltip="%showDifference"
@@ -101,4 +116,11 @@
          </toolbar>
       </menuContribution>
    </extension>
+
+  <extension point="org.eclipse.ui.preferencePages">
+ 	<page id="IIQToolsPreferencePage"
+ 		name="IIQ Tools"
+    		class="com.iiqtools.jdp.SettingsPreferencePage">
+   	</page>
+  </extension>
 </plugin>

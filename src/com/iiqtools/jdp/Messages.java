@@ -38,4 +38,6 @@ public class Messages extends NLS {
 	public static String cannotFindArtefactAnnotationError;
 	
 	public static String basicStructuralValidation;
+	
+	public static String docHasUnsavedChangesError;
 }
